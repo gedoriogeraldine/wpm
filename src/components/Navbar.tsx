@@ -2,14 +2,17 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
+import { Link, useLocation } from "react-router-dom";
 
 interface NavbarProps {
   transparent?: boolean;
+  isScrolled?: boolean;
 }
 
-const Navbar = ({ transparent = true }: NavbarProps) => {
+const Navbar = ({ transparent = true, isScrolled: propIsScrolled }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,6 +26,9 @@ const Navbar = ({ transparent = true }: NavbarProps) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Use prop isScrolled if provided, otherwise use state
+  const scrolled = propIsScrolled !== undefined ? propIsScrolled : isScrolled;
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -38,7 +44,7 @@ const Navbar = ({ transparent = true }: NavbarProps) => {
   return (
     <motion.nav
       className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
-        isScrolled
+        scrolled
           ? "bg-slate-900/95 backdrop-blur-md shadow-lg border-b border-blue-800/30"
           : transparent
             ? "bg-transparent"
@@ -51,44 +57,47 @@ const Navbar = ({ transparent = true }: NavbarProps) => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center">
-          <motion.a
-            href="/"
+          <motion.div
             className="flex items-center space-x-2 sm:space-x-3"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <img
-              src="/logowaterplus.jpg"
-              alt="Premiere WaterPlus Productions"
-              className="h-8 sm:h-10 lg:h-12 w-auto rounded-lg shadow-lg"
-            />
-            <div className="hidden sm:block">
-              <div className="text-white font-serif text-sm sm:text-lg font-bold">
-                Premiere WaterPlus
+            <Link to="/" className="flex items-center space-x-2 sm:space-x-3">
+              <img
+                src="/logowaterplus.jpg"
+                alt="Premiere WaterPlus Productions"
+                className="h-8 sm:h-10 lg:h-12 w-auto rounded-lg shadow-lg"
+              />
+              <div className="hidden sm:block">
+                <div className="text-white font-serif text-sm sm:text-lg font-bold">
+                  Premiere WaterPlus
+                </div>
+                <div className="text-blue-300 text-xs uppercase tracking-wider">
+                  Productions
+                </div>
               </div>
-              <div className="text-blue-300 text-xs uppercase tracking-wider">
-                Productions
-              </div>
-            </div>
-          </motion.a>
+            </Link>
+          </motion.div>
         </div>
 
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
           {navLinks.map((link) => (
-            <motion.a
-              key={link.name}
-              href={link.href}
-              className="text-blue-100 hover:text-white text-sm font-medium relative group transition-colors duration-200"
-              whileHover={{ scale: 1.05 }}
-            >
-              {link.name}
-              <motion.span
-                className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 group-hover:w-full transition-all duration-300"
-                initial={{ width: 0 }}
-                whileHover={{ width: "100%" }}
-              />
-            </motion.a>
+            <motion.div key={link.name} whileHover={{ scale: 1.05 }}>
+              <Link
+                to={link.href}
+                className={`text-blue-100 hover:text-white text-sm font-medium relative group transition-colors duration-200 ${
+                  location.pathname === link.href ? 'text-white' : ''
+                }`}
+              >
+                {link.name}
+                <motion.span
+                  className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 transition-all duration-300 ${
+                    location.pathname === link.href ? 'w-full' : 'w-0 group-hover:w-full'
+                  }`}
+                />
+              </Link>
+            </motion.div>
           ))}
         </div>
 
@@ -116,15 +125,20 @@ const Navbar = ({ transparent = true }: NavbarProps) => {
         >
           <div className="container mx-auto px-4 sm:px-6 py-4 flex flex-col space-y-3">
             {navLinks.map((link) => (
-              <motion.a
+              <motion.div
                 key={link.name}
-                href={link.href}
-                className="text-blue-100 hover:text-white text-base sm:text-lg font-medium py-2 border-b border-blue-800/20 transition-colors duration-200"
-                whileHover={{ x: 10, color: "#fff" }}
-                onClick={() => setIsMobileMenuOpen(false)}
+                whileHover={{ x: 10 }}
               >
-                {link.name}
-              </motion.a>
+                <Link
+                  to={link.href}
+                  className={`block text-blue-100 hover:text-white text-base sm:text-lg font-medium py-2 border-b border-blue-800/20 transition-colors duration-200 ${
+                    location.pathname === link.href ? 'text-white bg-blue-800/20 px-3 rounded' : ''
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              </motion.div>
             ))}
           </div>
         </motion.div>
